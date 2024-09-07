@@ -1,3 +1,3 @@
-javac -d . -cp ".;KarelJRobot.jar" GestionSemaforos.java
+javac -d . -cp ".;KarelJRobot.jar" Simulacion.java
 pause
 exit

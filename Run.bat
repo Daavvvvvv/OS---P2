@@ -1,3 +1,3 @@
-java -cp ".;KarelJRobot.jar" GestionSemaforos
+java -cp ".;KarelJRobot.jar" Simulacion
 pause
 exit
