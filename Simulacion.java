@@ -1,5 +1,6 @@
 import kareltherobot.*;
 
+import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,25 +26,27 @@ public class Simulacion implements Directions {
         robots[6] = new RobotOp(4, 18, West, 0);  // Robot en (4, 18) mirando hacia el sur
         robots[7] = new RobotOp(5, 18, West, 0);  // Robot en (5, 18) mirando hacia el sur
 
+
         // Simular la salida uno por uno
         for (RobotOp robot : robots) {
             new Thread(() -> {
-                try {
-
-                    salidaLock.lock();
-
-                    // Finalmente, moverse hacia la puerta en (3, 18)
-                    moverRobotABeeper(robot);
-                    RutaAParada4(robot);
-                }finally {
-                    salidaLock.unlock();
+                moverRobotFueraDelParqueadero(robot);
+                while (hayBeepersEnPosicion(robot, 8, 19)) {
+                    moverRobotACalle8(robot);
+                    asignarRutaAleatoria(robot);
+                    Regreso(robot);
                 }
+
 
             }).start();
         }
     }
 
-    // Método para mover el robot hacia la avenida 17
+    public static boolean hayBeepersEnPosicion(RobotOp robot, int street, int avenue) {
+        moverRobotAPosicion(robot, street, avenue);
+        return robot.nextToABeeper();
+    }
+
     public static void moverRobotAAvenida17(RobotOp robot) {
         // Mover el robot hacia la avenida 17
         while (robot.getAvenue() < 17) {
@@ -51,19 +54,78 @@ public class Simulacion implements Directions {
         }
     }
 
-    public static void EvitarParedes(RobotOp robot) {
-        while (robot.frontIsClear()) {
-            avanzarSiPosicionLibre(robot);  // Avanzar solo si está libre la posición
-            if (!robot.frontIsClear()) {
-                robot.turnLeft();
+    public static void Regreso(RobotOp robot) {
+        if(robot.getStreet() == 17 || robot.getAvenue() == 6) {
+            retorno1(robot);
+            Camino3(robot);
+        }else if(robot.getStreet() == 11 || robot.getAvenue() == 8) {
+            retorno2(robot);
+            Camino2(robot);
+            Camino3(robot);
+        }else if(robot.getStreet() == 7 || robot.getAvenue() == 9) {
+            retorno3(robot);
+            Camino2(robot);
+            Camino3(robot);
+        }
+        else if(robot.getStreet() == 19 || robot.getAvenue() == 18) {
+            retorno4(robot);
+            Camino3(robot);
+        }
+    }
+
+    public static void retorno1(RobotOp robot) {
+        moverRobotAPosicion(robot, 15, 6);
+        robot.turnLeft();
+        moverRobotAPosicion(robot, 18, 6);
+        robot.turnRight();
+    }
+
+    public static void retorno2(RobotOp robot) {
+        moverRobotAPosicion(robot, 13, 7);
+        robot.turnLeft();
+        moverRobotAPosicion(robot, 10, 7);
+        robot.turnRight();
+    }
+
+    public static void retorno3(RobotOp robot) {
+        moverRobotAPosicion(robot, 8, 8);
+        robot.turnLeft();
+    }
+
+    public static void retorno4(RobotOp robot) {
+        if(robot.facingWest()){
+            robot.turnLeft();
+            robot.turnLeft();
+        }
+        moverRobotAPosicion(robot, 11, 15);
+        robot.turnRight();
+    }
+
+
+    public static void asignarRutaAleatoria(RobotOp robot) {
+        Random random = new Random();
+        int rutaSeleccionada = random.nextInt(4) + 1;  // Generar un número entre 1 y 4
+        switch (rutaSeleccionada) {
+            case 1:
+                RutaAParada1(robot);
                 break;
-            }
+            case 2:
+                RutaAParada2(robot);
+                break;
+            case 3:
+                RutaAParada3(robot);
+                break;
+            case 4:
+                RutaAParada4(robot);
+                break;
+            default:
+                System.out.println("Error: Ruta no válida");
         }
     }
 
     public static void AlgoritmoDejarUsuarios(RobotOp robot) {
         robot.turnRight();
-        for(int i= 0; i <2; i++){
+        for (int i = 0; i < 2; i++) {
             robot.move();
         }
         robot.turnRight();
@@ -85,6 +147,7 @@ public class Simulacion implements Directions {
 
     public static void Camino3(RobotOp robot) {
         moverRobotAPosicion(robot, 10, 10);
+        robot.turnRight();
     }
 
     public static void RutaAParada1(RobotOp robot) {
@@ -93,8 +156,6 @@ public class Simulacion implements Directions {
     }
 
     public static void RutaAParada2(RobotOp robot) {
-        Camino1(robot);
-        Camino2(robot);
         moverRobotAPosicion(robot, 10, 7);
         AlgoritmoDejarUsuarios(robot);
     }
@@ -113,9 +174,7 @@ public class Simulacion implements Directions {
     }
 
     public static void RutaAParada4(RobotOp robot) {
-        Camino1(robot);
-        Camino2(robot);
-        moverRobotAPosicion(robot, 10,15);
+        moverRobotAPosicion(robot, 10, 15);
         robot.turnRight();
         robot.move();
         robot.turnLeft();
@@ -124,11 +183,12 @@ public class Simulacion implements Directions {
         moverRobotAPosicion(robot, 16, 12);
         robot.turnRight();
         moverRobotAPosicion(robot, 19, 18);
+        robot.putBeeper();
     }
 
     public static void moverRobotAPosicion(RobotOp robot, int targetStreet, int targetAvenue) {
         while (robot.getStreet() != targetStreet || robot.getAvenue() != targetAvenue) {
-                avanzarSiPosicionLibre(robot);
+            avanzarSiPosicionLibre(robot);
         }
 
         // Al llegar a la posición (18, 6), el robot se detendrá
@@ -136,9 +196,7 @@ public class Simulacion implements Directions {
     }
 
     public static void moverRobotACalle8(RobotOp robot) {
-        while (robot.getStreet() < 8) {
-            avanzarSiPosicionLibre(robot);  // Moverse solo si la posición está libre
-        }
+        moverRobotAPosicion(robot, 8, 19);
         robot.pickBeeper();
     }
 
@@ -155,16 +213,14 @@ public class Simulacion implements Directions {
                 avanzarSiPosicionLibre(robot);
             }
             robot.turnLeft();
-            EvitarParedes(robot);
         }
         // Si el robot está en una calle inferior a la 3, moverse hacia el sur
         else if (robot.getStreet() < 3) {
             robot.turnLeft();
             avanzarSiPosicionLibre(robot);  // Moverse solo si la posición está libre
             robot.turnRight();
-            EvitarParedes(robot);
+            avanzarSiPosicionLibre(robot);
         }
-        avanzarSiPosicionLibre(robot);  // Moverse solo si la posición está libre
     }
 
     public static void moverRobotAAvenida11(RobotOp robot) {
@@ -174,31 +230,29 @@ public class Simulacion implements Directions {
     }
 
     // Método para mover el robot hacia la puerta en (3, 18)
-    public static void moverRobotABeeper(RobotOp robot) {
-        try{
+    public static void moverRobotFueraDelParqueadero(RobotOp robot) {
+        try {
             salidaLock.lock();
             moverRobotAAvenida17(robot);
             moverRobotACalle3(robot);
-            moverRobotACalle8(robot);
-            moverRobotAAvenida11(robot);
-        }finally {
+        } finally {
             salidaLock.unlock();
         }
     }
 
     // Método para avanzar solo si la posición frente al robot está libre
     public static void avanzarSiPosicionLibre(RobotOp robot) {
-            // Verificar si el robot puede avanzar
-            if (robot.frontIsClear()) {
-                robot.move();  // Avanzar hacia la siguiente posición si está libre
-            } else {
-                robot.turnLeft();
-                if(!robot.frontIsClear()){
-                    for(int i = 0; i < 2; i++){
-                        robot.turnLeft();
-                    }
+        // Verificar si el robot puede avanzar
+        if (robot.frontIsClear()) {
+            robot.move();  // Avanzar hacia la siguiente posición si está libre
+        } else {
+            robot.turnLeft();
+            if (!robot.frontIsClear()) {
+                for (int i = 0; i < 2; i++) {
+                    robot.turnLeft();
                 }
             }
+        }
     }
 }
 
@@ -221,6 +275,7 @@ class RobotOp extends Robot {
         int avenueEndIndex = robotInfo.indexOf(")", avenueIndex);
         return Integer.parseInt(robotInfo.substring(avenueIndex + 8, avenueEndIndex));
     }
+
 
     // Método adicional para girar a la derecha
     public void turnRight() {
