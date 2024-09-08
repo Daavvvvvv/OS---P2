@@ -11,6 +11,7 @@ public class Simulacion implements Directions {
         // Configuración inicial del mundo
         World.readWorld("PracticaOperativos.kwld");
         World.setVisible(true);
+        World.showSpeedControl(true, true); //Needed to make them start
 
         // Crear 8 robots en el parqueadero en diferentes posiciones
         RobotOp[] robots = new RobotOp[8];  // Definimos un array de tamaño 8 para los 8 robots
@@ -28,14 +29,13 @@ public class Simulacion implements Directions {
         for (RobotOp robot : robots) {
             new Thread(() -> {
                 try {
-                    // Controlar la salida con un lock para que solo un robot salga a la vez
+
                     salidaLock.lock();
 
                     // Finalmente, moverse hacia la puerta en (3, 18)
-                    moverRobotAPuerta(robot);
-
-                } finally {
-                    // Liberar el lock después de que el robot haya salido
+                    moverRobotABeeper(robot);
+                    RutaAParada4(robot);
+                }finally {
                     salidaLock.unlock();
                 }
 
@@ -59,6 +59,80 @@ public class Simulacion implements Directions {
                 break;
             }
         }
+    }
+
+    public static void AlgoritmoDejarUsuarios(RobotOp robot) {
+        robot.turnRight();
+        for(int i= 0; i <2; i++){
+            robot.move();
+        }
+        robot.turnRight();
+        robot.move();
+        robot.turnRight();
+        robot.move();
+        robot.putBeeper();
+    }
+
+    public static void Camino1(RobotOp robot) {
+        moverRobotAPosicion(robot, 9, 6);
+        robot.turnRight();
+    }
+
+    public static void Camino2(RobotOp robot) {
+        moverRobotAPosicion(robot, 9, 10);
+        robot.turnRight();
+    }
+
+    public static void Camino3(RobotOp robot) {
+        moverRobotAPosicion(robot, 10, 10);
+    }
+
+    public static void RutaAParada1(RobotOp robot) {
+        moverRobotAPosicion(robot, 18, 6);
+        AlgoritmoDejarUsuarios(robot);
+    }
+
+    public static void RutaAParada2(RobotOp robot) {
+        Camino1(robot);
+        Camino2(robot);
+        moverRobotAPosicion(robot, 10, 7);
+        AlgoritmoDejarUsuarios(robot);
+    }
+
+    public static void RutaAParada3(RobotOp robot) {
+        Camino1(robot);
+        moverRobotAPosicion(robot, 6, 8);
+        robot.turnLeft();
+        robot.move();
+        robot.move();
+        robot.turnRight();
+        robot.move();
+        robot.turnRight();
+        robot.move();
+        robot.putBeeper();
+    }
+
+    public static void RutaAParada4(RobotOp robot) {
+        Camino1(robot);
+        Camino2(robot);
+        moverRobotAPosicion(robot, 10,15);
+        robot.turnRight();
+        robot.move();
+        robot.turnLeft();
+        moverRobotAPosicion(robot, 15, 15);
+        robot.turnRight();
+        moverRobotAPosicion(robot, 16, 12);
+        robot.turnRight();
+        moverRobotAPosicion(robot, 19, 18);
+    }
+
+    public static void moverRobotAPosicion(RobotOp robot, int targetStreet, int targetAvenue) {
+        while (robot.getStreet() != targetStreet || robot.getAvenue() != targetAvenue) {
+                avanzarSiPosicionLibre(robot);
+        }
+
+        // Al llegar a la posición (18, 6), el robot se detendrá
+        System.out.println("Robot llegó a la posición (" + targetStreet + ", " + targetAvenue + ")");
     }
 
     public static void moverRobotACalle8(RobotOp robot) {
@@ -94,39 +168,37 @@ public class Simulacion implements Directions {
     }
 
     public static void moverRobotAAvenida11(RobotOp robot) {
-        robot.turnLeft();
-        while (robot.getAvenue() < 11) {
+        while (robot.getAvenue() > 11) {
             avanzarSiPosicionLibre(robot);
         }
     }
 
     // Método para mover el robot hacia la puerta en (3, 18)
-    public static void moverRobotAPuerta(RobotOp robot) {
-        moverRobotAAvenida17(robot);
-        moverRobotACalle3(robot);
-        moverRobotACalle8(robot);
-        moverRobotAAvenida11(robot);
+    public static void moverRobotABeeper(RobotOp robot) {
+        try{
+            salidaLock.lock();
+            moverRobotAAvenida17(robot);
+            moverRobotACalle3(robot);
+            moverRobotACalle8(robot);
+            moverRobotAAvenida11(robot);
+        }finally {
+            salidaLock.unlock();
+        }
     }
 
     // Método para avanzar solo si la posición frente al robot está libre
     public static void avanzarSiPosicionLibre(RobotOp robot) {
-        movimientoLock.lock();  // Bloquear el movimiento para que ningún otro robot avance
-
-        try {
             // Verificar si el robot puede avanzar
             if (robot.frontIsClear()) {
                 robot.move();  // Avanzar hacia la siguiente posición si está libre
             } else {
                 robot.turnLeft();
-                try {
-                    Thread.sleep(500);  // Esperar antes de intentar moverse nuevamente
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if(!robot.frontIsClear()){
+                    for(int i = 0; i < 2; i++){
+                        robot.turnLeft();
+                    }
                 }
             }
-        } finally {
-            movimientoLock.unlock();  // Liberar el lock para que otros robots puedan avanzar
-        }
     }
 }
 
