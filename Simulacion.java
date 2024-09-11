@@ -99,6 +99,8 @@ public class Simulacion implements Directions {
         }
         moverRobotAPosicion(robot, 11, 15);
         robot.turnRight();
+        avanzarSiPosicionLibre(robot);
+        robot.turnRight();
     }
 
 
@@ -118,8 +120,6 @@ public class Simulacion implements Directions {
             case 4:
                 RutaAParada4(robot);
                 break;
-            default:
-                System.out.println("Error: Ruta no válida");
         }
     }
 
