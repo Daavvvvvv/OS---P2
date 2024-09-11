@@ -64,8 +64,6 @@ public class Simulacion implements Directions {
             Camino3(robot);
         }else if(robot.getStreet() == 7 || robot.getAvenue() == 9) {
             retorno3(robot);
-            Camino2(robot);
-            Camino3(robot);
         }
         else if(robot.getStreet() == 19 || robot.getAvenue() == 18) {
             retorno4(robot);
@@ -219,12 +217,6 @@ public class Simulacion implements Directions {
             robot.turnLeft();
             avanzarSiPosicionLibre(robot);  // Moverse solo si la posición está libre
             robot.turnRight();
-            avanzarSiPosicionLibre(robot);
-        }
-    }
-
-    public static void moverRobotAAvenida11(RobotOp robot) {
-        while (robot.getAvenue() > 11) {
             avanzarSiPosicionLibre(robot);
         }
     }
