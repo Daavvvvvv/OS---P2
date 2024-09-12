@@ -1,8 +1,10 @@
 import kareltherobot.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.List;
 
 public class Simulacion implements Directions {
     private static final Lock salidaLock = new ReentrantLock();  // Lock para la salida de los robots
@@ -31,6 +33,7 @@ public class Simulacion implements Directions {
         for (RobotOp robot : robots) {
             new Thread(() -> {
                 moverRobotFueraDelParqueadero(robot);
+                robot.setFueraDelParqueadero(true);
                 while (hayBeepersEnPosicion(robot, 8, 19)) {
                     moverRobotACalle8(robot);
                     asignarRutaAleatoria(robot);
@@ -55,17 +58,16 @@ public class Simulacion implements Directions {
     }
 
     public static void Regreso(RobotOp robot) {
-        if(robot.getStreet() == 17 || robot.getAvenue() == 6) {
+        if (robot.getStreet() == 17 || robot.getAvenue() == 6) {
             retorno1(robot);
             Camino3(robot);
-        }else if(robot.getStreet() == 11 || robot.getAvenue() == 8) {
+        } else if (robot.getStreet() == 11 || robot.getAvenue() == 8) {
             retorno2(robot);
             Camino2(robot);
             Camino3(robot);
-        }else if(robot.getStreet() == 7 || robot.getAvenue() == 9) {
+        } else if (robot.getStreet() == 7 || robot.getAvenue() == 9) {
             retorno3(robot);
-        }
-        else if(robot.getStreet() == 19 || robot.getAvenue() == 18) {
+        } else if (robot.getStreet() == 19 || robot.getAvenue() == 18) {
             retorno4(robot);
             Camino3(robot);
         }
@@ -91,7 +93,7 @@ public class Simulacion implements Directions {
     }
 
     public static void retorno4(RobotOp robot) {
-        if(robot.facingWest()){
+        if (robot.facingWest()) {
             robot.turnLeft();
             robot.turnLeft();
         }
@@ -250,8 +252,71 @@ public class Simulacion implements Directions {
 
 // Clase que extiende a Robot y nos permite obtener la calle y avenida del robot
 class RobotOp extends Robot {
+
+    private static List<RobotOp> allRobots = new ArrayList<>();
+    private boolean fueraDelParqueadero = false;
+
     public RobotOp(int street, int avenue, Direction direction, int beeps) {
         super(street, avenue, direction, beeps);
+        allRobots.add(this);
+    }
+
+    public int[] getPosition() {
+        return new int[]{getStreet(), getAvenue()};
+    }
+
+    public boolean isRobotAhead() {
+        int[] nextPosition = getNextPosition();
+        for (RobotOp robot : allRobots) {
+            if (robot != this) {
+                int[] robotPosition = robot.getPosition();
+                if (nextPosition[0] == robotPosition[0] && nextPosition[1] == robotPosition[1]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Método para obtener la próxima posición basada en la dirección actual
+    public int[] getNextPosition() {
+        int street = getStreet();
+        int avenue = getAvenue();
+        if (facingNorth()) {
+            street--;
+        } else if (facingSouth()) {
+            street++;
+        } else if (facingEast()) {
+            avenue++;
+        } else if (facingWest()) {
+            avenue--;
+        }
+        return new int[]{street, avenue};
+    }
+
+    @Override
+    public void move() {
+        // Repetir hasta que no haya un robot adelante
+        if (fueraDelParqueadero) {
+            while (isRobotAhead()) {
+                System.out.println("Esperando, hay un robot adelante...");
+                esperar(900);  // Esperar 900 milisegundos antes de volver a intentar
+            }
+            // Una vez que no haya un robot adelante, se mueve
+        }
+        super.move();
+    }
+
+    public void setFueraDelParqueadero(boolean value) {
+        this.fueraDelParqueadero = value;
+    }
+
+    public void esperar(int milisegundos) {
+        try {
+            Thread.sleep(milisegundos);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getStreet() {
