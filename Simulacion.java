@@ -49,8 +49,86 @@ public class Simulacion implements Directions {
         parada2.add(new Posicion(11, 8));
         parada2.add(new Posicion(12, 8));
 
+
+//      PARADA 3 POSICIONES
+        List<Posicion> parada3 = new ArrayList<>();
+        parada3.add(new Posicion(7, 7));
+        parada3.add(new Posicion(8, 7));
+        parada3.add(new Posicion(8, 8));
+        parada3.add(new Posicion(8, 9));
+        parada3.add(new Posicion(7, 9));
+
+
+//      PARADA 4 POSICIONES
+
+        List<Posicion> parada4 = new ArrayList<>();
+        parada4.add(new Posicion(11, 15 ));
+        parada4.add(new Posicion(11, 14));
+        parada4.add(new Posicion(11, 13));
+        parada4.add(new Posicion(11, 12));
+        parada4.add(new Posicion(11, 11));
+        parada4.add(new Posicion(12, 11));
+        parada4.add(new Posicion(13, 11));
+        parada4.add(new Posicion(14, 11));
+        parada4.add(new Posicion(15, 11));
+        parada4.add(new Posicion(15, 12));
+        parada4.add(new Posicion(15, 13));
+        parada4.add(new Posicion(15, 14));
+        parada4.add(new Posicion(15, 15));
+        parada4.add(new Posicion(14, 15));
+        parada4.add(new Posicion(13, 15));
+        parada4.add(new Posicion(13, 16));
+        parada4.add(new Posicion(13, 17));
+        parada4.add(new Posicion(14, 17));
+        parada4.add(new Posicion(15, 17));
+        parada4.add(new Posicion(16, 17));
+        parada4.add(new Posicion(16, 16));
+        parada4.add(new Posicion(16, 15));
+        parada4.add(new Posicion(16, 14));
+        parada4.add(new Posicion(16, 13));
+        parada4.add(new Posicion(16, 12));
+        parada4.add(new Posicion(17, 12));
+        parada4.add(new Posicion(17, 13));
+        parada4.add(new Posicion(17, 14));
+        parada4.add(new Posicion(17, 15));
+        parada4.add(new Posicion(17, 16));
+        parada4.add(new Posicion(17, 17));
+        parada4.add(new Posicion(17, 18));
+        parada4.add(new Posicion(16, 18));
+        parada4.add(new Posicion(15, 18));
+        parada4.add(new Posicion(14, 18));
+        parada4.add(new Posicion(13, 18));
+        parada4.add(new Posicion(12, 18));
+        parada4.add(new Posicion(11, 18));
+        parada4.add(new Posicion(10, 18));
+        parada4.add(new Posicion(9, 18));
+        parada4.add(new Posicion(9, 19));
+        parada4.add(new Posicion(10, 19));
+        parada4.add(new Posicion(11, 19));
+        parada4.add(new Posicion(12, 19));
+        parada4.add(new Posicion(13, 19));
+        parada4.add(new Posicion(14, 19));
+        parada4.add(new Posicion(15, 19));
+        parada4.add(new Posicion(16, 19));
+        parada4.add(new Posicion(17, 19));
+        parada4.add(new Posicion(18, 19));
+        parada4.add(new Posicion(19, 19));
+        parada4.add(new Posicion(19, 18));
+        parada4.add(new Posicion(18, 18));
+
+
+//      ISLAS PARADA 4
+        List<Posicion> islasParada4 = new ArrayList<>();
+        islasParada4.add(new Posicion(12, 15));
+        islasParada4.add(new Posicion(15, 16));
+        islasParada4.add(new Posicion(16, 11));
+        islasParada4.add(new Posicion(12, 17));
+
         mapaDeParadas.put("Parada 1", parada1);
         mapaDeParadas.put("Parada 2", parada2);
+        mapaDeParadas.put("Parada 3", parada3);
+        mapaDeParadas.put("Parada 4", parada4);
+        mapaDeParadas.put("Islas", islasParada4);
 
 
 
