@@ -1,5 +1,6 @@
 import kareltherobot.*;
 
+import javax.xml.crypto.dsig.spec.HMACParameterSpec;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
@@ -32,7 +33,24 @@ public class Simulacion implements Directions {
         parada1.add(new Posicion(17, 5));
         parada1.add(new Posicion(18, 5));
 
+//      PARADA 2 POSICIONES
+        List<Posicion> parada2 = new ArrayList<>();
+        parada2.add(new Posicion(12, 6));
+        parada2.add(new Posicion(12, 5));
+        parada2.add(new Posicion(12, 4));
+        parada2.add(new Posicion(13, 4));
+        parada2.add(new Posicion(13, 5));
+        parada2.add(new Posicion(13, 6));
+        parada2.add(new Posicion(13, 7));
+        parada2.add(new Posicion(13, 8));
+        parada2.add(new Posicion(13, 9));
+        parada2.add(new Posicion(12, 9));
+        parada2.add(new Posicion(11, 9));
+        parada2.add(new Posicion(11, 8));
+        parada2.add(new Posicion(12, 8));
+
         mapaDeParadas.put("Parada 1", parada1);
+        mapaDeParadas.put("Parada 2", parada2);
 
 
 
@@ -149,7 +167,7 @@ public class Simulacion implements Directions {
                 RutaAParada1(robot, mapaDeParadas);
                 break;
             case 2:
-                RutaAParada2(robot);
+                RutaAParada2(robot, mapaDeParadas);
                 break;
             case 3:
                 RutaAParada3(robot);
@@ -158,18 +176,6 @@ public class Simulacion implements Directions {
                 RutaAParada4(robot);
                 break;
         }
-    }
-
-    public static void AlgoritmoDejarUsuarios(RobotOp robot) {
-        robot.turnRight();
-        for (int i = 0; i < 2; i++) {
-            robot.move();
-        }
-        robot.turnRight();
-        robot.move();
-        robot.turnRight();
-        robot.move();
-        robot.putBeeper();
     }
 
     public static void Camino1(RobotOp robot) {
@@ -199,9 +205,13 @@ public class Simulacion implements Directions {
         recorrerParada(robot, "Parada 1", mapaDeParadas);  // Pasar directamente "Parada 1"
     }
 
-    public static void RutaAParada2(RobotOp robot) {
+    public static void RutaAParada2(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
         moverRobotAPosicion(robot, 10, 7);
-        AlgoritmoDejarUsuarios(robot);
+        robot.turnRight();
+        robot.move();
+        robot.move();
+        robot.turnLeft();
+        recorrerParada(robot, "Parada 2", mapaDeParadas);
     }
 
     public static void RutaAParada3(RobotOp robot) {
