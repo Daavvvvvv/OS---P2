@@ -1,5 +1,6 @@
 import kareltherobot.*;
 
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
@@ -10,7 +11,32 @@ public class Simulacion implements Directions {
     private static final Lock salidaLock = new ReentrantLock();  // Lock para la salida de los robots
     private static final Lock movimientoLock = new ReentrantLock();  // Lock para controlar el movimiento de los robots
 
+
     public static void main(String[] args) {
+
+        HashMap<String, List<Posicion>> mapaDeParadas = new HashMap<>();
+//      PARADA 1 POSICIONES
+        List<Posicion> parada1 = new ArrayList<>();
+        parada1.add(new Posicion(17, 7));
+        parada1.add(new Posicion(17, 8));
+        parada1.add(new Posicion(16, 8));
+        parada1.add(new Posicion(15, 8));
+        parada1.add(new Posicion(15, 7));
+        parada1.add(new Posicion(15, 6));
+        parada1.add(new Posicion(15, 5));
+        parada1.add(new Posicion(15, 4));
+        parada1.add(new Posicion(15, 3));
+        parada1.add(new Posicion(16, 3));
+        parada1.add(new Posicion(17, 3));
+        parada1.add(new Posicion(17, 4));
+        parada1.add(new Posicion(17, 5));
+        parada1.add(new Posicion(18, 5));
+
+        mapaDeParadas.put("Parada 1", parada1);
+
+
+
+
         // Configuración inicial del mundo
         World.readWorld("PracticaOperativos.kwld");
         World.setVisible(true);
@@ -36,12 +62,23 @@ public class Simulacion implements Directions {
                 robot.setFueraDelParqueadero(true);
                 while (hayBeepersEnPosicion(robot, 8, 19)) {
                     moverRobotACalle8(robot);
-                    asignarRutaAleatoria(robot);
+                    asignarRutaAleatoria(robot, mapaDeParadas);
                     Regreso(robot);
                 }
-
-
             }).start();
+        }
+    }
+
+    public static void recorrerParada(RobotOp robot, String parada, HashMap<String, List<Posicion>> mapaDeParadas) {
+        List<Posicion> posiciones = mapaDeParadas.get(parada);  // Obtener las posiciones de la parada
+
+        if (posiciones != null) {
+            for (Posicion posicion : posiciones) {
+                moverRobotAPosicion(robot, posicion.getStreet(), posicion.getAvenue());
+                System.out.println("Robot llegó a la posición: " + posicion);
+            }
+        } else {
+            System.out.println("Parada no encontrada: " + parada);
         }
     }
 
@@ -104,12 +141,12 @@ public class Simulacion implements Directions {
     }
 
 
-    public static void asignarRutaAleatoria(RobotOp robot) {
+    public static void asignarRutaAleatoria(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
         Random random = new Random();
         int rutaSeleccionada = random.nextInt(4) + 1;  // Generar un número entre 1 y 4
         switch (rutaSeleccionada) {
             case 1:
-                RutaAParada1(robot);
+                RutaAParada1(robot, mapaDeParadas);
                 break;
             case 2:
                 RutaAParada2(robot);
@@ -150,9 +187,16 @@ public class Simulacion implements Directions {
         robot.turnRight();
     }
 
-    public static void RutaAParada1(RobotOp robot) {
-        moverRobotAPosicion(robot, 18, 6);
-        AlgoritmoDejarUsuarios(robot);
+    public static void RutaAParada1(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
+        // Usar el método que recorre la parada
+        moverRobotAPosicion(robot, 18, 6);  // Moverse a la posición inicial
+        robot.turnRight();
+        robot.move();
+        robot.move();
+        robot.turnLeft();
+        robot.move();
+        robot.turnLeft();
+        recorrerParada(robot, "Parada 1", mapaDeParadas);  // Pasar directamente "Parada 1"
     }
 
     public static void RutaAParada2(RobotOp robot) {
@@ -227,12 +271,20 @@ public class Simulacion implements Directions {
     public static void moverRobotFueraDelParqueadero(RobotOp robot) {
         try {
             salidaLock.lock();
+            if(robot.getPosition().equals("(4, 18)") || robot.getPosition().equals("(5, 18)")){
+                robot.move();
+                robot.turnLeft();
+                moverRobotAAvenida17(robot);
+                robot.turnLeft();
+                moverRobotACalle3(robot);
+            }
             moverRobotAAvenida17(robot);
             moverRobotACalle3(robot);
         } finally {
             salidaLock.unlock();
         }
     }
+
 
     // Método para avanzar solo si la posición frente al robot está libre
     public static void avanzarSiPosicionLibre(RobotOp robot) {
@@ -261,62 +313,9 @@ class RobotOp extends Robot {
         allRobots.add(this);
     }
 
-    public int[] getPosition() {
-        return new int[]{getStreet(), getAvenue()};
-    }
-
-    public boolean isRobotAhead() {
-        int[] nextPosition = getNextPosition();
-        for (RobotOp robot : allRobots) {
-            if (robot != this) {
-                int[] robotPosition = robot.getPosition();
-                if (nextPosition[0] == robotPosition[0] && nextPosition[1] == robotPosition[1]) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    // Método para obtener la próxima posición basada en la dirección actual
-    public int[] getNextPosition() {
-        int street = getStreet();
-        int avenue = getAvenue();
-        if (facingNorth()) {
-            street--;
-        } else if (facingSouth()) {
-            street++;
-        } else if (facingEast()) {
-            avenue++;
-        } else if (facingWest()) {
-            avenue--;
-        }
-        return new int[]{street, avenue};
-    }
-
-    @Override
-    public void move() {
-        // Repetir hasta que no haya un robot adelante
-        if (fueraDelParqueadero) {
-            while (isRobotAhead()) {
-                System.out.println("Esperando, hay un robot adelante...");
-                esperar(900);  // Esperar 900 milisegundos antes de volver a intentar
-            }
-            // Una vez que no haya un robot adelante, se mueve
-        }
-        super.move();
-    }
 
     public void setFueraDelParqueadero(boolean value) {
         this.fueraDelParqueadero = value;
-    }
-
-    public void esperar(int milisegundos) {
-        try {
-            Thread.sleep(milisegundos);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public int getStreet() {
@@ -333,11 +332,38 @@ class RobotOp extends Robot {
         return Integer.parseInt(robotInfo.substring(avenueIndex + 8, avenueEndIndex));
     }
 
+    public String getPosition() {
+        return "(" + getStreet() + ", " + getAvenue() + ")";
+    }
+
 
     // Método adicional para girar a la derecha
     public void turnRight() {
         turnLeft();
         turnLeft();
         turnLeft();
+    }
+}
+
+class Posicion {
+    int street;
+    int avenue;
+
+    public Posicion(int street, int avenue) {
+        this.street = street;
+        this.avenue = avenue;
+    }
+
+    public int getStreet() {
+        return street;
+    }
+
+    public int getAvenue() {
+        return avenue;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + street + ", " + avenue + ")";
     }
 }
