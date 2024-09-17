@@ -188,8 +188,9 @@ public class Simulacion implements Directions {
     public static void RutaAParada1(RobotOp robot) {
         // Usar el método que recorre la parada
         try {
-            semaforoParada1.acquire();
+
             moverRobotAPosicion(robot, 18, 6);  // Moverse a la posición inicial
+            semaforoParada1.acquire();
             robot.turnRight();
             robot.move();
             robot.move();
@@ -210,8 +211,9 @@ public class Simulacion implements Directions {
 
     public static void RutaAParada2(RobotOp robot) {
         try {
-            semaforoParada2.acquire();
+
             moverRobotAPosicion(robot, 10, 7);
+            semaforoParada2.acquire();
             robot.turnRight();
             robot.move();
             robot.move();
@@ -234,9 +236,11 @@ public class Simulacion implements Directions {
 
     public static void RutaAParada3(RobotOp robot) {
         try {
-            semaforoParada3.acquire();
+
             Camino1(robot);
-            moverRobotAPosicion(robot, 6, 8);
+            moverRobotAPosicion(robot, 6, 7);
+            semaforoParada3.acquire();
+            robot.move();
             robot.turnLeft();
             robot.move();
             robot.move();
@@ -254,8 +258,10 @@ public class Simulacion implements Directions {
 
     public static void RutaAParada4(RobotOp robot) {
         try {
+
+            moverRobotAPosicion(robot, 10, 16);
             semaforoParada4.acquire();
-            moverRobotAPosicion(robot, 10, 15);
+            robot.move();
             robot.turnRight();
             robot.move();
             robot.turnLeft();
@@ -325,7 +331,6 @@ public class Simulacion implements Directions {
     }
 
     public static void avanzarSiPosicionLibre(RobotOp robot) {
-        String posicionActual = robot.getPosition();
         String proximaPosicion = calcularProximaPosicion(robot);
 
         try {
@@ -333,7 +338,6 @@ public class Simulacion implements Directions {
             if (robot.frontIsClear()) {
                 esperarHastaQuePosicionEsteDisponible(proximaPosicion);  // Esperar hasta que la posición esté libre
                 robot.move();
-                notificarPosicionDisponible(posicionActual);  // Liberar la posición anterior
             } else {
                 robot.turnLeft();  // Intentar girar si no puede avanzar
                 proximaPosicion = calcularProximaPosicion(robot);
