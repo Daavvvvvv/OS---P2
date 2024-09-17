@@ -1,136 +1,27 @@
 import kareltherobot.*;
 
-import javax.xml.crypto.dsig.spec.HMACParameterSpec;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.List;
+import java.util.Collections;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.Semaphore;
 
 public class Simulacion implements Directions {
-    private static final Lock salidaLock = new ReentrantLock();  // Lock para la salida de los robots
-    private static final Lock movimientoLock = new ReentrantLock();  // Lock para controlar el movimiento de los robots
+    private static final Semaphore semaforoParada1 = new Semaphore(8);  // Parada 1: máximo 8 robots
+    private static final Semaphore semaforoParada2 = new Semaphore(9);  // Parada 2: máximo 9 robots
+    private static final Semaphore semaforoParada3 = new Semaphore(1);  // Parada 3: máximo 1 robot
+    private static final Semaphore semaforoParada4 = new Semaphore(1);  // Parada 4: máximo 4 robots
 
+
+    private static final Lock salidaLock = new ReentrantLock();  // Lock para la salida de los robots
+    private static final List<String> posicionesOcupadas = Collections.synchronizedList(new ArrayList<>());
+    private static final Lock posicionLock = new ReentrantLock();
+    private static final Condition posicionDisponible = posicionLock.newCondition();
 
     public static void main(String[] args) {
-
-        HashMap<String, List<Posicion>> mapaDeParadas = new HashMap<>();
-//      PARADA 1 POSICIONES
-        List<Posicion> parada1 = new ArrayList<>();
-        parada1.add(new Posicion(17, 7));
-        parada1.add(new Posicion(17, 8));
-        parada1.add(new Posicion(16, 8));
-        parada1.add(new Posicion(15, 8));
-        parada1.add(new Posicion(15, 7));
-        parada1.add(new Posicion(15, 6));
-        parada1.add(new Posicion(15, 5));
-        parada1.add(new Posicion(15, 4));
-        parada1.add(new Posicion(15, 3));
-        parada1.add(new Posicion(16, 3));
-        parada1.add(new Posicion(17, 3));
-        parada1.add(new Posicion(17, 4));
-        parada1.add(new Posicion(17, 5));
-        parada1.add(new Posicion(18, 5));
-
-//      PARADA 2 POSICIONES
-        List<Posicion> parada2 = new ArrayList<>();
-        parada2.add(new Posicion(12, 6));
-        parada2.add(new Posicion(12, 5));
-        parada2.add(new Posicion(12, 4));
-        parada2.add(new Posicion(13, 4));
-        parada2.add(new Posicion(13, 5));
-        parada2.add(new Posicion(13, 6));
-        parada2.add(new Posicion(13, 7));
-        parada2.add(new Posicion(13, 8));
-        parada2.add(new Posicion(13, 9));
-        parada2.add(new Posicion(12, 9));
-        parada2.add(new Posicion(11, 9));
-        parada2.add(new Posicion(11, 8));
-        parada2.add(new Posicion(12, 8));
-
-
-//      PARADA 3 POSICIONES
-        List<Posicion> parada3 = new ArrayList<>();
-        parada3.add(new Posicion(7, 7));
-        parada3.add(new Posicion(8, 7));
-        parada3.add(new Posicion(8, 8));
-        parada3.add(new Posicion(8, 9));
-        parada3.add(new Posicion(7, 9));
-
-
-//      PARADA 4 POSICIONES
-
-        List<Posicion> parada4 = new ArrayList<>();
-        parada4.add(new Posicion(11, 15 ));
-        parada4.add(new Posicion(11, 14));
-        parada4.add(new Posicion(11, 13));
-        parada4.add(new Posicion(11, 12));
-        parada4.add(new Posicion(11, 11));
-        parada4.add(new Posicion(12, 11));
-        parada4.add(new Posicion(13, 11));
-        parada4.add(new Posicion(14, 11));
-        parada4.add(new Posicion(15, 11));
-        parada4.add(new Posicion(15, 12));
-        parada4.add(new Posicion(15, 13));
-        parada4.add(new Posicion(15, 14));
-        parada4.add(new Posicion(15, 15));
-        parada4.add(new Posicion(14, 15));
-        parada4.add(new Posicion(13, 15));
-        parada4.add(new Posicion(13, 16));
-        parada4.add(new Posicion(13, 17));
-        parada4.add(new Posicion(14, 17));
-        parada4.add(new Posicion(15, 17));
-        parada4.add(new Posicion(16, 17));
-        parada4.add(new Posicion(16, 16));
-        parada4.add(new Posicion(16, 15));
-        parada4.add(new Posicion(16, 14));
-        parada4.add(new Posicion(16, 13));
-        parada4.add(new Posicion(16, 12));
-        parada4.add(new Posicion(17, 12));
-        parada4.add(new Posicion(17, 13));
-        parada4.add(new Posicion(17, 14));
-        parada4.add(new Posicion(17, 15));
-        parada4.add(new Posicion(17, 16));
-        parada4.add(new Posicion(17, 17));
-        parada4.add(new Posicion(17, 18));
-        parada4.add(new Posicion(16, 18));
-        parada4.add(new Posicion(15, 18));
-        parada4.add(new Posicion(14, 18));
-        parada4.add(new Posicion(13, 18));
-        parada4.add(new Posicion(12, 18));
-        parada4.add(new Posicion(11, 18));
-        parada4.add(new Posicion(10, 18));
-        parada4.add(new Posicion(9, 18));
-        parada4.add(new Posicion(9, 19));
-        parada4.add(new Posicion(10, 19));
-        parada4.add(new Posicion(11, 19));
-        parada4.add(new Posicion(12, 19));
-        parada4.add(new Posicion(13, 19));
-        parada4.add(new Posicion(14, 19));
-        parada4.add(new Posicion(15, 19));
-        parada4.add(new Posicion(16, 19));
-        parada4.add(new Posicion(17, 19));
-        parada4.add(new Posicion(18, 19));
-        parada4.add(new Posicion(19, 19));
-        parada4.add(new Posicion(19, 18));
-        parada4.add(new Posicion(18, 18));
-
-
-//      ISLAS PARADA 4
-        List<Posicion> islasParada4 = new ArrayList<>();
-        islasParada4.add(new Posicion(12, 15));
-        islasParada4.add(new Posicion(15, 16));
-        islasParada4.add(new Posicion(16, 11));
-        islasParada4.add(new Posicion(12, 17));
-
-        mapaDeParadas.put("Parada 1", parada1);
-        mapaDeParadas.put("Parada 2", parada2);
-        mapaDeParadas.put("Parada 3", parada3);
-        mapaDeParadas.put("Parada 4", parada4);
-        mapaDeParadas.put("Islas", islasParada4);
-
-
 
 
         // Configuración inicial del mundo
@@ -138,17 +29,24 @@ public class Simulacion implements Directions {
         World.setVisible(true);
         World.showSpeedControl(true, true); //Needed to make them start
 
-        // Crear 8 robots en el parqueadero en diferentes posiciones
+// Crear 8 robots en el parqueadero en diferentes posiciones
         RobotOp[] robots = new RobotOp[8];  // Definimos un array de tamaño 8 para los 8 robots
 
-        // Primeros 6 robots en las posiciones desde (2, 12) hasta (7, 12)
+// Primeros 6 robots en las posiciones desde (2, 12) hasta (7, 12)
         for (int i = 0; i < 6; i++) {
             robots[i] = new RobotOp(i + 2, 12, East, 0);  // Posiciones en el parqueadero mirando al este
+            String posicionInicial = robots[i].getPosition();
+            posicionesOcupadas.add(posicionInicial);
         }
 
-        // Los dos robots adicionales en las posiciones (4, 18) y (5, 18) mirando hacia el sur
-        robots[6] = new RobotOp(4, 18, West, 0);  // Robot en (4, 18) mirando hacia el sur
-        robots[7] = new RobotOp(5, 18, West, 0);  // Robot en (5, 18) mirando hacia el sur
+// Los dos robots adicionales en las posiciones (4, 18) y (5, 18) mirando hacia el oeste
+        robots[6] = new RobotOp(4, 18, West, 0);  // Robot en (4, 18) mirando hacia el oeste
+        String posicionInicial6 = robots[6].getPosition();
+        posicionesOcupadas.add(posicionInicial6);
+
+        robots[7] = new RobotOp(5, 18, West, 0);  // Robot en (5, 18) mirando hacia el oeste
+        String posicionInicial7 = robots[7].getPosition();
+        posicionesOcupadas.add(posicionInicial7);
 
 
         // Simular la salida uno por uno
@@ -158,23 +56,35 @@ public class Simulacion implements Directions {
                 robot.setFueraDelParqueadero(true);
                 while (hayBeepersEnPosicion(robot, 8, 19)) {
                     moverRobotACalle8(robot);
-                    asignarRutaAleatoria(robot, mapaDeParadas);
+                    asignarRutaAleatoria(robot);
                     Regreso(robot);
                 }
             }).start();
         }
     }
 
-    public static void recorrerParada(RobotOp robot, String parada, HashMap<String, List<Posicion>> mapaDeParadas) {
-        List<Posicion> posiciones = mapaDeParadas.get(parada);  // Obtener las posiciones de la parada
-
-        if (posiciones != null) {
-            for (Posicion posicion : posiciones) {
-                moverRobotAPosicion(robot, posicion.getStreet(), posicion.getAvenue());
-                System.out.println("Robot llegó a la posición: " + posicion);
+    public static void esperarHastaQuePosicionEsteDisponible(String posicion) throws InterruptedException {
+        posicionLock.lock();
+        try {
+            while (posicionesOcupadas.contains(posicion)) {
+                posicionDisponible.await();  // Esperar hasta que la posición esté disponible
             }
-        } else {
-            System.out.println("Parada no encontrada: " + parada);
+            posicionesOcupadas.add(posicion);  // Marcar la posición como ocupada
+        } finally {
+            posicionLock.unlock();
+        }
+    }
+
+
+    public static void notificarPosicionDisponible(String posicion) {
+        posicionLock.lock();
+        try {
+            if (posicionesOcupadas.contains(posicion)) {
+                posicionesOcupadas.remove(posicion);  // Liberar la posición
+                posicionDisponible.signalAll();  // Notificar a todos los hilos que la posición está disponible
+            }
+        } finally {
+            posicionLock.unlock();
         }
     }
 
@@ -192,10 +102,8 @@ public class Simulacion implements Directions {
 
     public static void Regreso(RobotOp robot) {
         if (robot.getStreet() == 17 || robot.getAvenue() == 6) {
-            retorno1(robot);
             Camino3(robot);
         } else if (robot.getStreet() == 11 || robot.getAvenue() == 8) {
-            retorno2(robot);
             Camino2(robot);
             Camino3(robot);
         } else if (robot.getStreet() == 7 || robot.getAvenue() == 9) {
@@ -214,7 +122,9 @@ public class Simulacion implements Directions {
     }
 
     public static void retorno2(RobotOp robot) {
-        moverRobotAPosicion(robot, 13, 7);
+        moverRobotAPosicion(robot, 12, 9);
+        robot.turnLeft();
+        moverRobotAPosicion(robot, 12, 7);
         robot.turnLeft();
         moverRobotAPosicion(robot, 10, 7);
         robot.turnRight();
@@ -222,6 +132,9 @@ public class Simulacion implements Directions {
 
     public static void retorno3(RobotOp robot) {
         moverRobotAPosicion(robot, 8, 8);
+        robot.turnLeft();
+        robot.move();
+        robot.move();
         robot.turnLeft();
     }
 
@@ -234,18 +147,19 @@ public class Simulacion implements Directions {
         robot.turnRight();
         avanzarSiPosicionLibre(robot);
         robot.turnRight();
+        semaforoParada4.release();
     }
 
 
-    public static void asignarRutaAleatoria(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
+    public static void asignarRutaAleatoria(RobotOp robot) {
         Random random = new Random();
         int rutaSeleccionada = random.nextInt(4) + 1;  // Generar un número entre 1 y 4
         switch (rutaSeleccionada) {
             case 1:
-                RutaAParada1(robot, mapaDeParadas);
+                RutaAParada1(robot);
                 break;
             case 2:
-                RutaAParada2(robot, mapaDeParadas);
+                RutaAParada2(robot);
                 break;
             case 3:
                 RutaAParada3(robot);
@@ -271,61 +185,98 @@ public class Simulacion implements Directions {
         robot.turnRight();
     }
 
-    public static void RutaAParada1(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
+    public static void RutaAParada1(RobotOp robot) {
         // Usar el método que recorre la parada
-        moverRobotAPosicion(robot, 18, 6);  // Moverse a la posición inicial
-        robot.turnRight();
-        robot.move();
-        robot.move();
-        robot.turnLeft();
-        robot.move();
-        robot.turnLeft();
-        recorrerParada(robot, "Parada 1", mapaDeParadas);  // Pasar directamente "Parada 1"
+        try {
+            semaforoParada1.acquire();
+            moverRobotAPosicion(robot, 18, 6);  // Moverse a la posición inicial
+            robot.turnRight();
+            robot.move();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.turnLeft();
+            robot.move();
+            robot.putBeeper();
+            retorno1(robot);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            semaforoParada1.release();
+        }
     }
 
-    public static void RutaAParada2(RobotOp robot, HashMap<String, List<Posicion>> mapaDeParadas) {
-        moverRobotAPosicion(robot, 10, 7);
-        robot.turnRight();
-        robot.move();
-        robot.move();
-        robot.turnLeft();
-        recorrerParada(robot, "Parada 2", mapaDeParadas);
+    public static void RutaAParada2(RobotOp robot) {
+        try {
+            semaforoParada2.acquire();
+            moverRobotAPosicion(robot, 10, 7);
+            robot.turnRight();
+            robot.move();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.turnLeft();
+            robot.move();
+            robot.putBeeper();
+            retorno2(robot);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            semaforoParada2.release();
+        }
+
+
     }
 
     public static void RutaAParada3(RobotOp robot) {
-        Camino1(robot);
-        moverRobotAPosicion(robot, 6, 8);
-        robot.turnLeft();
-        robot.move();
-        robot.move();
-        robot.turnRight();
-        robot.move();
-        robot.turnRight();
-        robot.move();
-        robot.putBeeper();
+        try {
+            semaforoParada3.acquire();
+            Camino1(robot);
+            moverRobotAPosicion(robot, 6, 8);
+            robot.turnLeft();
+            robot.move();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.turnRight();
+            robot.move();
+            robot.putBeeper();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }finally {
+            semaforoParada3.release();
+        }
     }
 
     public static void RutaAParada4(RobotOp robot) {
-        moverRobotAPosicion(robot, 10, 15);
-        robot.turnRight();
-        robot.move();
-        robot.turnLeft();
-        moverRobotAPosicion(robot, 15, 15);
-        robot.turnRight();
-        moverRobotAPosicion(robot, 16, 12);
-        robot.turnRight();
-        moverRobotAPosicion(robot, 19, 18);
-        robot.putBeeper();
+        try {
+            semaforoParada4.acquire();
+            moverRobotAPosicion(robot, 10, 15);
+            robot.turnRight();
+            robot.move();
+            robot.turnLeft();
+            moverRobotAPosicion(robot, 15, 15);
+            robot.turnRight();
+            moverRobotAPosicion(robot, 16, 12);
+            robot.turnRight();
+            moverRobotAPosicion(robot, 19, 18);
+            robot.putBeeper();
+        }catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void moverRobotAPosicion(RobotOp robot, int targetStreet, int targetAvenue) {
         while (robot.getStreet() != targetStreet || robot.getAvenue() != targetAvenue) {
             avanzarSiPosicionLibre(robot);
         }
-
-        // Al llegar a la posición (18, 6), el robot se detendrá
         System.out.println("Robot llegó a la posición (" + targetStreet + ", " + targetAvenue + ")");
     }
+
 
     public static void moverRobotACalle8(RobotOp robot) {
         moverRobotAPosicion(robot, 8, 19);
@@ -359,7 +310,7 @@ public class Simulacion implements Directions {
     public static void moverRobotFueraDelParqueadero(RobotOp robot) {
         try {
             salidaLock.lock();
-            if(robot.getPosition().equals("(4, 18)") || robot.getPosition().equals("(5, 18)")){
+            if (robot.getPosition().equals("(4, 18)") || robot.getPosition().equals("(5, 18)")) {
                 robot.move();
                 robot.turnLeft();
                 moverRobotAAvenida17(robot);
@@ -373,21 +324,52 @@ public class Simulacion implements Directions {
         }
     }
 
-
-    // Método para avanzar solo si la posición frente al robot está libre
     public static void avanzarSiPosicionLibre(RobotOp robot) {
-        // Verificar si el robot puede avanzar
-        if (robot.frontIsClear()) {
-            robot.move();  // Avanzar hacia la siguiente posición si está libre
-        } else {
-            robot.turnLeft();
-            if (!robot.frontIsClear()) {
-                for (int i = 0; i < 2; i++) {
+        String posicionActual = robot.getPosition();
+        String proximaPosicion = calcularProximaPosicion(robot);
+
+        try {
+            // Verificar si el robot puede avanzar físicamente
+            if (robot.frontIsClear()) {
+                esperarHastaQuePosicionEsteDisponible(proximaPosicion);  // Esperar hasta que la posición esté libre
+                robot.move();
+                notificarPosicionDisponible(posicionActual);  // Liberar la posición anterior
+            } else {
+                robot.turnLeft();  // Intentar girar si no puede avanzar
+                proximaPosicion = calcularProximaPosicion(robot);
+                esperarHastaQuePosicionEsteDisponible(proximaPosicion);  // Esperar hasta que la posición esté libre
+                notificarPosicionDisponible(proximaPosicion);  // No pudo avanzar, liberar la próxima posición
+                if (!robot.frontIsClear()) {
+                    robot.turnLeft();  // Si tampoco puede avanzar después de girar, girar dos veces
                     robot.turnLeft();
+                    proximaPosicion = calcularProximaPosicion(robot);
+                    esperarHastaQuePosicionEsteDisponible(proximaPosicion);  // Esperar hasta que la posición esté libre
+                    notificarPosicionDisponible(proximaPosicion);
                 }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();  // Restaurar el estado de interrupción si ocurre una excepción
         }
     }
+
+
+    public static String calcularProximaPosicion(RobotOp robot) {
+        int nextStreet = robot.getStreet();
+        int nextAvenue = robot.getAvenue();
+
+        if (robot.facingNorth()) {
+            nextStreet++;
+        } else if (robot.facingSouth()) {
+            nextStreet--;
+        } else if (robot.facingEast()) {
+            nextAvenue++;
+        } else if (robot.facingWest()) {
+            nextAvenue--;
+        }
+
+        return "(" + nextStreet + ", " + nextAvenue + ")";
+    }
+
 }
 
 // Clase que extiende a Robot y nos permite obtener la calle y avenida del robot
@@ -413,6 +395,19 @@ class RobotOp extends Robot {
         return Integer.parseInt(robotInfo.substring(streetIndex + 8, streetEndIndex));
     }
 
+    @Override
+    public void move() {
+        // Obtener la posición actual antes de moverse
+        String posicionActual = getPosition();
+
+        // Llamar al método move() original para mover al robot
+        super.move();
+
+        // Notificar que la posición anterior está libre
+        Simulacion.notificarPosicionDisponible(posicionActual);
+    }
+
+
     public int getAvenue() {
         String robotInfo = this.toString();
         int avenueIndex = robotInfo.indexOf("avenue: ");
@@ -430,28 +425,5 @@ class RobotOp extends Robot {
         turnLeft();
         turnLeft();
         turnLeft();
-    }
-}
-
-class Posicion {
-    int street;
-    int avenue;
-
-    public Posicion(int street, int avenue) {
-        this.street = street;
-        this.avenue = avenue;
-    }
-
-    public int getStreet() {
-        return street;
-    }
-
-    public int getAvenue() {
-        return avenue;
-    }
-
-    @Override
-    public String toString() {
-        return "(" + street + ", " + avenue + ")";
     }
 }
